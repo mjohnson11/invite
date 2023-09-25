@@ -88,7 +88,9 @@ var not_playing = true;
 var not_dropped = true;
 var not_dropped_wavy = true;
 var squirrel_time = 90;
-var dog_time = 37.1;
+var dog_time = 44.8;
+var wavy_time = 30.3;
+//wavy_time = 0;
 
 var drawing = 'wavy';
 var current_freq_scale = 'radial';
@@ -107,9 +109,13 @@ var drag_func;
 fonts = ["Alfa Slab One", "Architects Daughter", "Pacifico", "Piedra", "Sansita Swashed", "Staatliches", "Comic Sans MS", "Courier New"];
 font_colors = ["red", "aqua", "blue", "yellow", "black", "purple", "pink"];
 font_drops = [true, true, true, true, true, true, true];
-font_drop_times = [42, 50, 58, 64, 72, 80, 88, 96];
-text_drops = ["A HOUSEWARMING PARTY",  "A BIRTHDAY PARTY", "OCTOBER 20TH", "454 41st ST", "HOPE YOU'RE HAVING A LOVELY DAY", "SAVE THAT MF DATE"];
-text_sizes = [2, 1, 1.5, 1.5, 2, 0.5];
+font_drop_times = [37.5, 41, 50, 58, 64, 72, 80, 88];
+//font_drop_times = [1,1,1,1,1,1,1,1,1,1,1,1];
+text_drops = ["OCTOBER 20TH", "454 41st ST", "A HOUSEWARMING PARTY",  "A BIRTHDAY PARTY",  "HOPE YOU'RE HAVING A LOVELY DAY", "SAVE THAT MF DATE"];
+text_sizes = [3.5, 2.8, 2, 1.9, 2.1, 1];
+text_offsets = [0, 0, 0.1, 0.1, 0.1, 0.1, 0.1];
+rotate_steps = [0, 0, 0.3, 0.3, 0.3, 0.3, 0.3];
+text_ypos = [0.32, 0.8, Math.random()*0.8+0.1, Math.random()*0.8+0.1, Math.random()*0.8+0.1, Math.random()*0.8+0.1, Math.random()*0.8+0.1, Math.random()*0.8+0.1];
 
 function getRandomColor() {
   var letters = '0123456789ABCDEF';
@@ -292,23 +298,24 @@ const DrawingObj = {
   text: {
     onclick: null,
     name: 'text',
-    make_one: function(text, fontsize_base) {
-      let cx0 = Math.random()*0.5
-      let cy0 = Math.random()*0.8+0.1
+    make_one: function(text, fontsize_base, font_offset, rotate_step, text_y) {
+      let cx0 = 0.5;
+      let cy0 = text_y;
       var tmp = the_svg.append('text')
         .html(text)
-        .attr('x', cx0*w-w/10)
+        .attr('x', cx0*w+w*font_offset)
         .attr('y', cy0*h-h/10)
         .style('font-size', fontsize_base*w/50)
         .style('font-family', fonts[Math.floor(Math.random()*fonts.length)])
         .style('fill', font_colors[Math.floor(Math.random()*font_colors.length)])
-      drawn.push({el: tmp, type: 'text', x: cx0, y: cy0, x_dir: (Math.floor(Math.random()/0.5)-0.5), y_dir: (Math.floor(Math.random()/0.5)-0.5), factor: 0.5*afactor/10, r: 30, scaling_direction: 'radial', rotate: 0, fsb: fontsize_base});
+        .style('text-anchor', 'middle')
+      drawn.push({el: tmp, type: 'text', x: cx0, y: cy0, x_dir: (Math.floor(Math.random()/0.5)-0.5), y_dir: (Math.floor(Math.random()/0.5)-0.5), factor: 0.5*afactor/10, r: 30, scaling_direction: 'radial', rotate: 0, fsb: fontsize_base, rs: rotate_step});
     },
     animate: function(rec, fake_amp=false) {
       let amp = get_amplitude(rec.scaling_direction, rec.factor, rec.x, rec.y, rec.r, fake_amp)/10;
       if (amp < 0) amp = 0;
-      rec.el.style('font-size', (1+amp/5)*rec.fsb*w/50)
-      rec.rotate += 0.3;
+      rec.el.style('font-size', (1+amp/3)*rec.fsb*w/50)
+      rec.rotate += rec.rs;
       rec.el.attr('transform', "rotate(" + String(rec.rotate) + "," + String(w/2) + "," + String(h/2) + ")")
     }
   },
@@ -406,7 +413,7 @@ const DrawingObj = {
           let coords = points[j+1].split(" ");
           let x = parseFloat(coords[0]);
           let y = parseFloat(coords[1]);
-          let amp = get_amplitude(rec.scaling_direction, rec.factor, x, y, rd, fake_amp)/6;
+          let amp = get_amplitude(rec.scaling_direction, rec.factor, x, y, rd, fake_amp)/4;
           if (amp < 0) amp = 0;
           new_points.push([x + dir*s*amp/Math.sqrt(1 + s*s), y - dir*amp/Math.sqrt(1 + s*s)]);
         }
@@ -547,7 +554,7 @@ function get_amplitude(direction_method, factor, x, y, r, fake_amp) {
 function animatron () {
   ac += 1;
   //if (ac % (Math.floor(ac/10)+1) == 0) {
-  if (((pts_sound._ctx.currentTime-start_time) > 2) && (d3.selectAll(".star")["_groups"][0].length < 1000)) {
+  if (d3.selectAll(".star")["_groups"][0].length < 1000) {
     DrawingObj['star'].make_one();
   }
   if (((pts_sound._ctx.currentTime-start_time) > 15.3) && not_dropped) {
@@ -555,7 +562,7 @@ function animatron () {
     document.getElementById("pigeon2").style.display="block";
     not_dropped = false;
   }
-  if (((pts_sound._ctx.currentTime-start_time) > 30.3) && not_dropped_wavy) {
+  if (((pts_sound._ctx.currentTime-start_time) > wavy_time) && not_dropped_wavy) {
     for (let el of existing_lines) {
       DrawingObj['wavy'].make_from_rec(el);
       current_col = getRandomColor();
@@ -573,7 +580,7 @@ function animatron () {
   for (let i=0; i<font_drop_times.length; i++) {
     if (((pts_sound._ctx.currentTime-start_time)>font_drop_times[i]) && font_drops[i]) {
       font_drops[i] = false;
-      DrawingObj['text'].make_one(text_drops[i], text_sizes[i]);
+      DrawingObj['text'].make_one(text_drops[i], text_sizes[i], text_offsets[i], rotate_steps[i], text_ypos[i]);
     }
   }
   data = pts_sound.freqDomain(); 
@@ -586,11 +593,14 @@ var bufferLoaded = false;
 Sound.loadAsBuffer("PartyRockAnthem.mp3" ).then( s => {
   pts_sound = s;
   bufferLoaded = true;
+  pts_sound.analyze(2048); // recreate buffer again
+  data = new Uint8Array(1024);
+  data_len = data.length;
+  document.getElementById("HOLDING").style.display="none";
+  document.getElementById("GO_BUTTON").style.display="flex";
 }).catch( e => console.error(e) );
 
-function DO_IT(){
-
-  document.getElementById("GO_BUTTON").style.display="none";
+function LOAD_IT(){
 
   the_svg = d3.select('#svg_div')
     .append('svg')
@@ -600,12 +610,16 @@ function DO_IT(){
       //.on('mousedown', mousedown) //OLD - apparently mousemove doesn't work if we're recording the drag 
       //.on('mouseup', mouseup);
 
+  document.getElementById("svg_element").style.display="none";
+
   var dummy_svg = d3.select('#svg_div')
     .append('svg')
       .attr('width', w)
       .attr('height', h)
       .attr('id', 'dummy_svg_element')
       .on('click', draw_one);
+
+  document.getElementById("dummy_svg_element").style.display="none";
 
   drag_func = d3.drag()
     .container(function() { return this })
@@ -615,17 +629,17 @@ function DO_IT(){
 
   dummy_svg.call(drag_func);
 
-  if (bufferLoaded) {
-    pts_sound.analyze(2048); // recreate buffer again
+}
+
+function DO_IT() {
+    document.getElementById("GO_BUTTON").style.display="none";
+    document.getElementById("svg_element").style.display="block";
+    document.getElementById("dummy_svg_element").style.display="block";
     pts_sound.start();
     start_time = pts_sound._ctx.currentTime;
-    data = new Uint8Array(1024);
-    data_len = data.length;
     not_playing = false;
     console.log('here');
     intervalhandle = setInterval(function(){animatron()}, 1);
-  }
-
 }
 
 
