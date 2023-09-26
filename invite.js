@@ -107,10 +107,10 @@ var corner_dist = Math.sqrt(0.5);
 var drag_func;
 
 fonts = ["Alfa Slab One", "Architects Daughter", "Pacifico", "Piedra", "Sansita Swashed", "Staatliches", "Comic Sans MS", "Courier New"];
-font_colors = ["red", "aqua", "blue", "yellow", "black", "purple", "pink"];
+font_colors = ["red", "aqua", "blue", "black", "purple", "pink", "Tomato", "Orange", "MediumSeaGreen", "SlateBlue", "Gold", "DarkCyan"];
 font_drops = [true, true, true, true, true, true, true];
 font_drop_times = [37.5, 41, 50, 58, 64, 72, 80, 88];
-//font_drop_times = [1,1,1,1,1,1,1,1,1,1,1,1];
+font_drop_times = [1,1,1,1,1,1,1,1,1,1,1,1];
 text_drops = ["OCTOBER 20TH", "454 41st ST", "A HOUSEWARMING PARTY",  "A BIRTHDAY PARTY",  "HOPE YOU'RE HAVING A LOVELY DAY", "bring the chipmunkfunk", "SAVE THAT MF DATE"];
 text_sizes = [3.5, 2.8, 2, 1.9, 2.1, 3, 1];
 text_offsets = [0, 0, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1];
